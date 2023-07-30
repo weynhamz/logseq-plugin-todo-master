@@ -18,17 +18,21 @@ const allMarkers = [
   "later",
   "doing", // maps to now
   "todo", // maps to later
+  "canceled", // maps to done
 ] as const;
 
 type Marker = typeof allMarkers[number];
 
 const reduceToMap = (vals?: Marker[]) => {
-  function unify(m: Marker): Exclude<Marker, "doing" | "todo"> {
+  function unify(m: Marker): Exclude<Marker, "doing" | "todo" | "canceled"> {
     if (m === "todo") {
       return "later";
     }
     if (m === "doing") {
       return "now";
+    }
+    if (m === "canceled") {
+      return "done";
     }
     return m;
   }
