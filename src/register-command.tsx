@@ -113,6 +113,27 @@ async function getBlockTreeAndMode(maybeUUID: string) {
 
   if (checkIsUUid(maybeUUID)) {
     tree = await logseq.Editor.getBlock(maybeUUID, { includeChildren: true });
+    if (tree) {
+      const query = `
+        [:find (pull ?b [*])
+         :in $ ?parent
+         :where
+           [?b :block/page ?p]
+           [?p :block/journal? true]
+           [?b :block/marker ?marker]
+           [(contains? #{"TODO" "LATER" "DOING" "NOW" "DONE" "CANCELED"} ?marker)]
+           [?b :block/refs ?parent]
+        ]`;
+      const inputs = [tree.id];
+      const result = (
+        await logseq.DB.datascriptQuery(
+          query,
+          ...(inputs ?? [])
+        )
+      )?.flat();
+      mode = "query";
+      tree = { children: result };
+    }
   }
 
   if (tree?.content) {
