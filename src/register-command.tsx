@@ -19,13 +19,17 @@ const allMarkers = [
   "doing", // maps to now
   "todo", // maps to later
   "canceled", // maps to done
+  "waiting", // maps to later
 ] as const;
 
 type Marker = typeof allMarkers[number];
 
 const reduceToMap = (vals?: Marker[]) => {
-  function unify(m: Marker): Exclude<Marker, "doing" | "todo" | "canceled"> {
+  function unify(m: Marker): Exclude<Marker, "doing" | "todo" | "canceled" | "waiting"> {
     if (m === "todo") {
+      return "later";
+    }
+    if (m === "waiting") {
       return "later";
     }
     if (m === "doing") {
@@ -121,7 +125,7 @@ async function getBlockTreeAndMode(maybeUUID: string) {
            [?b :block/page ?p]
            [?p :block/journal? true]
            [?b :block/marker ?marker]
-           [(contains? #{"TODO" "LATER" "DOING" "NOW" "DONE" "CANCELED"} ?marker)]
+           [(contains? #{"TODO" "LATER" "DOING" "NOW" "DONE" "CANCELED" "WAITING"} ?marker)]
            [?b :block/refs ?parent]
         ]`;
       const inputs = [tree.id];
